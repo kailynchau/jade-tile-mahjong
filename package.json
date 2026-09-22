@@ -1,0 +1,16 @@
+{
+  "name": "jade-tile-site",
+  "private": true,
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute jade-tile --remote --file=./schema.sql",
+    "db:migrate": "wrangler d1 execute jade-tile --remote --file=./migrate-auth.sql",
+    "db:init:local": "wrangler d1 execute jade-tile --local --file=./schema.sql",
+    "db:seed:local": "wrangler d1 execute jade-tile --local --file=./seed.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  },
+  "description": "Live leaderboards for the Jade Tile Mahjong Club \u2014 Cloudflare Workers + D1"
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jade Tile Mahjong Club</title>
+<meta name="description" content="Beginner and advanced leaderboards for the Jade Tile Mahjong Club.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%23134239'/><text y='.9em' x='50%25' text-anchor='middle' font-size='68'>🀄</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="/assets/leaderboard.css">
+</head>
+<body>
+
+<div class="shell">
+  <header class="site-head">
+    <div class="site-mark" aria-hidden="true">🀄</div>
+    <div>
+      <h1>Jade Tile</h1>
+      <p>Mahjong Club</p>
+    </div>
+  </header>
+
+  <div class="hero">
+    <h2>Jade Tile Leaderboard</h2>
+    <p>Updated after every [DAY] meet.</p>
+  </div>
+</div>
+
+<div class="shell" id="standings">
+  <div class="board-wrap">
+    <!-- The leaderboard section. Everything it needs is this div plus the
+         two files below; it can move into any page on the site. -->
+    <div id="jade-leaderboard"></div>
+  </div>
+</div>
+
+<div class="shell">
+  <p class="site-note">Scores are entered and approved by club execs after each meet.</p>
+
+  <footer class="site-foot">
+    <p>Jade Tile Mahjong Club</p>
+    <p><a href="/admin">Exec sign-in</a></p>
+  </footer>
+</div>
+
+<script src="/assets/leaderboard.js" defer></script>
+</body>
+</html>

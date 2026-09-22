@@ -1,0 +1,132 @@
+/* Jade Tile Mahjong Club — site chrome.
+   Deliberately light so the felt leaderboard panel reads as a board
+   sitting on a table, and so the section is proven to work on a host
+   page that does not share its palette. */
+
+:root {
+  --paper: #f7f3ea;
+  --paper-edge: #e5dcc8;
+  --ink: #1b2a25;
+  --ink-soft: #5e6d66;
+  --jade: #134239;
+  --bamboo: #2c7a58;
+  --cinnabar: #b33a2b;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 16.5px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+.shell { max-width: 620px; margin: 0 auto; padding: 0 18px; }
+
+/* ---------- masthead ---------- */
+.site-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 0 18px;
+}
+.site-mark {
+  width: 42px; height: 50px; flex: none;
+  border-radius: 8px;
+  background: var(--jade);
+  color: #f4efe1;
+  display: grid; place-items: center;
+  font-size: 24px; line-height: 1;
+  box-shadow: 0 3px 0 #0c2c26;
+}
+.site-head h1 {
+  font-family: "Kaisei Decol", Georgia, serif;
+  font-size: 23px;
+  line-height: 1.1;
+  margin: 0;
+}
+.site-head p { margin: 2px 0 0; font-size: 13.5px; color: var(--ink-soft); }
+
+.site-nav {
+  display: flex;
+  gap: 18px;
+  padding: 0 0 26px;
+  font-size: 14.5px;
+}
+.site-nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px;
+}
+.site-nav a:hover, .site-nav a:focus-visible { color: var(--ink); border-bottom-color: var(--bamboo); }
+
+/* ---------- hero ---------- */
+.hero { padding: 4px 0 24px; }
+.hero h2 {
+  font-family: "Kaisei Decol", Georgia, serif;
+  font-size: 28px;
+  line-height: 1.2;
+  margin: 0 0 6px;
+}
+.hero p { margin: 0; max-width: 46ch; color: var(--ink-soft); font-size: 15px; }
+
+/* ---------- one-line note under the board ---------- */
+.site-note {
+  margin: 0;
+  padding: 0 0 4px;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  max-width: 52ch;
+}
+
+/* ---------- generic sections ---------- */
+section.block { padding: 34px 0; border-top: 1px solid var(--paper-edge); }
+section.block h2 {
+  font-family: "Kaisei Decol", Georgia, serif;
+  font-size: 21px;
+  margin: 0 0 12px;
+}
+section.block p { margin: 0 0 12px; max-width: 52ch; }
+section.block p:last-child { margin-bottom: 0; }
+
+.facts { list-style: none; margin: 0; padding: 0; }
+.facts li {
+  display: flex;
+  gap: 14px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--paper-edge);
+}
+.facts li:last-child { border-bottom: 0; }
+.facts dt, .facts .k {
+  flex: none;
+  width: 92px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+.facts .v { flex: 1; }
+
+/* the leaderboard panel gets breathing room on both sides of the fold */
+.board-wrap { padding: 0 0 26px; }
+
+/* ---------- footer ---------- */
+.site-foot {
+  border-top: 1px solid var(--paper-edge);
+  padding: 22px 0 40px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.site-foot a { color: var(--ink-soft); }
+
+a:focus-visible, button:focus-visible { outline: 2.5px solid var(--bamboo); outline-offset: 2px; }

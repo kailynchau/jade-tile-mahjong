@@ -1,0 +1,26 @@
+name = "jade-tile"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+account_id = "b60511c1f7f15444694e1cddb3a92e6c"
+
+# Static site. Files in public/ are served first; anything that is not a
+# file (i.e. /api/*) falls through to the Worker in src/index.js.
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Scores live here. Create it once with:
+#   npx wrangler d1 create jade-tile
+# then paste the printed database_id below.
+[[d1_databases]]
+binding = "DB"
+database_name = "jade-tile"
+database_id = "37254170-abcb-4bfa-8598-5d98e527cadf"
+
+# OPTIONAL: per-person exec logins via Cloudflare Access.
+# Leave these empty to use the shared password instead
+# (npx wrangler secret put ADMIN_PASSWORD).
+# Access needs a custom domain — it cannot protect a workers.dev URL.
+[vars]
+ACCESS_TEAM_DOMAIN = ""
+ACCESS_AUD = ""
