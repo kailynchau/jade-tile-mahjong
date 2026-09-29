@@ -1,8 +1,8 @@
 # Jade Tile Mahjong Club
 
 Live leaderboards for a university mahjong club. Two boards — **Advanced**
-and **Beginner** — run side by side as tabs, each with its own standings,
-top 5, and win rates. Execs enter scores behind a password login; everyone
+and **Beginner** run side by side as tabs, each with its own standings,
+top 5, and win rates. Executives enter scores behind a password login; everyone
 else sees a read-only board.
 
 The leaderboard is written as a self-contained section, so it can drop into
