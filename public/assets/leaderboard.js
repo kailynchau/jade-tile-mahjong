@@ -58,8 +58,8 @@
 
   /** One row of the board. Shared by the top five and the pinned "you" row. */
   function rowHtml(p, mine) {
-    return '<li class="jtl__tile jtl__row' + (p.rank === 1 ? " jtl__row--first" : "") +
-      (mine ? " jtl__row--mine" : "") + '">' +
+    var podium = p.rank <= 3 ? " jtl__row--p" + p.rank : "";
+    return '<li class="jtl__tile jtl__row' + podium + (mine ? " jtl__row--mine" : "") + '">' +
       '<span class="jtl__n">' + p.rank + "</span>" +
       '<span class="jtl__nm"><span class="jtl__nmt">' + esc(p.name) + "</span>" +
       '<span class="jtl__sub">' + games(p.games) + " \u00b7 " + wrMeta(p) + "</span></span>" +

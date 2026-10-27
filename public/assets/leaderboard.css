@@ -195,6 +195,16 @@
 }
 .jtl__row--first .jtl__n { color: var(--jtl-cinnabar); }
 
+/* Podium: first three get their own edge and numeral, so the eye has
+   somewhere to land instead of five identical tiles. */
+.jtl__row--p1 { box-shadow: inset 4px 0 0 var(--jtl-brass), 0 4px 0 var(--jtl-tile-shade), 0 12px 22px rgba(0, 0, 0, .28); }
+.jtl__row--p2 { box-shadow: inset 4px 0 0 #7f9089, 0 4px 0 var(--jtl-tile-shade), 0 12px 22px rgba(0, 0, 0, .28); }
+.jtl__row--p3 { box-shadow: inset 4px 0 0 #b07a4e, 0 4px 0 var(--jtl-tile-shade), 0 12px 22px rgba(0, 0, 0, .28); }
+.jtl__row--p1 .jtl__n { color: var(--jtl-brass); font-size: 28px; }
+.jtl__row--p2 .jtl__n { color: #6b7a73; }
+.jtl__row--p3 .jtl__n { color: #a06c43; }
+.jtl__row--p1 .jtl__nmt { font-weight: 700; }
+
 /* Movement since the last meet. */
 .jtl__mv {
   display: block;
@@ -237,7 +247,10 @@
   font-variant-numeric: tabular-nums;
   font-weight: 700;
 }
-.jtl__row--mine {
+.jtl__row--mine,
+.jtl__row--mine.jtl__row--p1,
+.jtl__row--mine.jtl__row--p2,
+.jtl__row--mine.jtl__row--p3 {
   box-shadow: 0 4px 0 var(--jtl-tile-shade), 0 0 0 2.5px var(--jtl-bamboo), 0 12px 22px rgba(0, 0, 0, .28);
 }
 .jtl__row--mine .jtl__nmt::after { content: " — you"; color: var(--jtl-bamboo); font-weight: 700; }
