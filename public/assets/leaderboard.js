@@ -56,7 +56,7 @@
       (up ? "\u25B2" : "\u25BC") + Math.abs(m) + "</span>";
   }
 
-  /** One row of the board. */
+  /** One row of the board. Shared by the top five and the pinned "you" row. */
   function rowHtml(p, mine) {
     return '<li class="jtl__tile jtl__row' + (p.rank === 1 ? " jtl__row--first" : "") +
       (mine ? " jtl__row--mine" : "") + '">' +
@@ -317,8 +317,17 @@
       ? '<p class="jtl__count">' + d.total_players + " on this board</p>"
       : "";
 
+    // If you are on this board but below the shown five, pin your own row
+    // under a break so you can see yourself in context. Only your own score
+    // appears — everyone else below fifth stays private.
+    var pinned = "";
+    if (this.me && !this.me.unranked && this.me.tier === this.tier && this.me.in_top === false) {
+      pinned = '<li class="jtl__break" aria-hidden="true"><span></span><span></span><span></span></li>' +
+        rowHtml(this.me.you, true);
+    }
+
     return '<section><div class="jtl__head"><h2>Top 5</h2>' + count + "</div>" +
-      '<ol class="jtl__rows">' + rows + "</ol></section>";
+      '<ol class="jtl__rows">' + rows + pinned + "</ol></section>";
   };
 
   var JadeLeaderboard = {

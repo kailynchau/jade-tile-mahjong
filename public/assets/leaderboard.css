@@ -208,6 +208,20 @@
 .jtl__mv--down { color: var(--jtl-cinnabar); }
 .jtl__mv--hold, .jtl__mv--new { color: var(--jtl-muted); font-weight: 400; }
 .jtl__mv--new { font-size: 11px; }
+
+/* The break between the top five and your own pinned row. */
+.jtl__break {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  padding: 3px 0 1px;
+}
+.jtl__break span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: rgba(244, 239, 225, .4);
+}
 .jtl__nm { flex: 1; min-width: 0; }
 .jtl__nmt {
   display: block;
