@@ -6,9 +6,9 @@
  *
  * Public endpoints (no auth):
  *   GET  /api/tiers                       the boards and how many play on each
- *   GET  /api/standings?tier=             top five only, plus club-wide counts
+ *   GET  /api/standings?tier=             top five only, plus club-wide counts\n *                                         each with how far they moved since the last meet
  *   GET  /api/roster?tier=                player ids + names, no scores
- *   GET  /api/me?id=<playerId>            that player's rank, win rate and the
+ *   GET  /api/me?id=<playerId>            that player's rank, movement, win rate and the
  *                                         gap to the player above them
  *
  * Exec endpoints (sign-in required — see requireExec below):
@@ -77,8 +77,15 @@ async function handlePublic(request, env, url) {
   const path = url.pathname;
 
   if (path === "/api/tiers") {
+    // Counted the same way the board ranks: a player appears once they have
+    // played a round here, so the tab and the board never disagree.
     const { results } = await env.DB.prepare(
-      "SELECT tier, COUNT(*) AS n FROM players WHERE active = 1 GROUP BY tier"
+      `SELECT p.tier, COUNT(DISTINCT p.id) AS n
+         FROM players p
+         JOIN scores s ON s.player_id = p.id
+         JOIN rounds r ON r.id = s.round_id AND r.tier = p.tier
+        WHERE p.active = 1
+        GROUP BY p.tier`
     ).all();
     const counts = Object.fromEntries(results.map((r) => [r.tier, r.n]));
     return json({
@@ -90,11 +97,15 @@ async function handlePublic(request, env, url) {
   if (path === "/api/standings") {
     const tier = tierOf(url);
     const ranked = withRanks(await standings(env, tier));
+    const moved = await movement(env, tier, ranked);
     return json({
       tier,
       label: labelOf(tier),
       updated: await lastPlayed(env, tier),
-      players: ranked.slice(0, TOP_N).map(publicRow),
+      players: ranked.slice(0, TOP_N).map((p) => ({
+        ...publicRow(p),
+        movement: moved.get(p.id) ?? null,
+      })),
       total_players: ranked.length,
       rounds_played: await countRounds(env, tier),
     });
@@ -113,14 +124,27 @@ async function handlePublic(request, env, url) {
     if (!id) return json({ error: "missing_id" }, 400);
 
     const row = await env.DB.prepare(
-      "SELECT tier FROM players WHERE id = ? AND active = 1"
+      "SELECT tier, name FROM players WHERE id = ? AND active = 1"
     ).bind(id).first();
     if (!row) return json({ error: "unknown_player" }, 404);
 
     const tier = row.tier;
     const ranked = withRanks(await standings(env, tier));
+    const moved = await movement(env, tier, ranked);
     const i = ranked.findIndex((p) => p.id === id);
-    if (i === -1) return json({ error: "unknown_player" }, 404);
+
+    // On the board but no rounds yet: a real answer, not a 404.
+    if (i === -1) {
+      return json({
+        tier,
+        label: labelOf(tier),
+        unranked: true,
+        you: { id, name: row.name, score: 0, games: 0, wins: 0, win_rate: null, rank: null, movement: null },
+        in_top: false,
+        total_players: ranked.length,
+        ahead: null, lead: null, tied_with: [],
+      });
+    }
 
     const me = ranked[i];
     let ahead = null;
@@ -131,7 +155,10 @@ async function handlePublic(request, env, url) {
     return json({
       tier,
       label: labelOf(tier),
-      you: publicRow(me),
+      you: { ...publicRow(me), movement: moved.get(me.id) ?? null },
+      // The board lists the first five ROWS, not the first five ranks: six
+      // players level on 0 all hold rank 1, and only five of them are shown.
+      in_top: i < TOP_N,
       total_players: ranked.length,
       ahead: ahead ? { name: ahead.name, gap: ahead.score - me.score } : null,
       lead: !ahead && ranked[1] ? me.score - ranked[1].score : null,
@@ -316,26 +343,58 @@ async function handleAdmin(request, env, url) {
 /* queries                                                             */
 /* ------------------------------------------------------------------ */
 
-async function standings(env, tier) {
+/**
+ * Every active player on one board, with their total, games and wins.
+ *
+ * `before` limits it to rounds played strictly before that date, which is how
+ * the previous meet's ranks are recovered for the movement arrows.
+ *
+ * The cutoff lives in the JOIN, not the WHERE, and every aggregate then
+ * ignores the rows the join excluded. Filtering them out in WHERE instead
+ * would drop the whole player when *all* their rounds are after the cutoff —
+ * so someone who debuted at the last meet would vanish from the baseline, and
+ * everyone below them would be told they had fallen a place they never held.
+ */
+async function standings(env, tier, before = null) {
   const { results } = await env.DB.prepare(
     `SELECT p.id, p.name,
-            COALESCE(SUM(s.points), 0) AS score,
-            COUNT(s.round_id)          AS games,
+            COALESCE(SUM(CASE WHEN r.id IS NOT NULL THEN s.points END), 0) AS score,
+            COUNT(r.id) AS games,
             COALESCE(SUM(
-              CASE WHEN s.points = (
+              CASE WHEN r.id IS NOT NULL AND s.points = (
                 SELECT MAX(s2.points) FROM scores s2 WHERE s2.round_id = s.round_id
               ) THEN 1 ELSE 0 END
             ), 0) AS wins
        FROM players p
        LEFT JOIN scores s ON s.player_id = p.id
-       LEFT JOIN rounds r ON r.id = s.round_id
-      WHERE p.active = 1
-        AND p.tier = ?1
-        AND (r.tier IS NULL OR r.tier = ?1)
+       LEFT JOIN rounds r ON r.id = s.round_id AND r.tier = ?1
+                         ${before ? "AND r.played_on < ?2" : ""}
+      WHERE p.active = 1 AND p.tier = ?1
       GROUP BY p.id, p.name
       ORDER BY score DESC, p.name COLLATE NOCASE ASC`
-  ).bind(tier).all();
-  return results;
+  ).bind(...(before ? [tier, before] : [tier])).all();
+  // Nobody holds a rank until they have played a round here. A player who has
+  // only just been added would otherwise sit at 0 points in the middle of the
+  // board, above everyone on a negative score — and, worse, occupy a place in
+  // the previous meet's baseline that they never actually held, inflating the
+  // movement of everyone below them.
+  return results.filter((p) => p.games);
+}
+
+/**
+ * How far each player moved since the meet before the most recent one.
+ * Positive is up the board. Null means no comparison is possible: they had
+ * not played before the last meet, so they have not moved from anywhere.
+ */
+async function movement(env, tier, ranked) {
+  const last = await lastPlayed(env, tier);
+  if (!last) return new Map();
+  const was = new Map(
+    withRanks(await standings(env, tier, last)).map((p) => [p.id, p.rank])
+  );
+  return new Map(
+    ranked.map((p) => [p.id, p.games && was.has(p.id) ? was.get(p.id) - p.rank : null])
+  );
 }
 
 function withRanks(rows) {

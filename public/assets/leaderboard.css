@@ -194,6 +194,20 @@
   color: var(--jtl-muted);
 }
 .jtl__row--first .jtl__n { color: var(--jtl-cinnabar); }
+
+/* Movement since the last meet. */
+.jtl__mv {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+.jtl__mv--up { color: var(--jtl-bamboo); }
+.jtl__mv--down { color: var(--jtl-cinnabar); }
+.jtl__mv--hold, .jtl__mv--new { color: var(--jtl-muted); font-weight: 400; }
+.jtl__mv--new { font-size: 11px; }
 .jtl__nm { flex: 1; min-width: 0; }
 .jtl__nmt {
   display: block;

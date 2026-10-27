@@ -38,6 +38,35 @@
   function wrMeta(p) {
     return p.win_rate === null || p.win_rate === undefined ? "no games yet" : p.win_rate + "% wins";
   }
+  /**
+   * How far a player moved since the last meet, as a small chip.
+   * Positive is up. Null means they had not played before the last meet, so
+   * there is nothing to compare against — a new player has not "held" at 0.
+   */
+  function moveChip(m) {
+    if (m === null || m === undefined) {
+      return '<span class="jtl__mv jtl__mv--new" title="First meet on this board">new</span>';
+    }
+    if (m === 0) {
+      return '<span class="jtl__mv jtl__mv--hold" title="No change since the last meet">–</span>';
+    }
+    var up = m > 0;
+    return '<span class="jtl__mv jtl__mv--' + (up ? "up" : "down") +
+      '" title="' + (up ? "Up " : "Down ") + Math.abs(m) + " since the last meet\">" +
+      (up ? "\u25B2" : "\u25BC") + Math.abs(m) + "</span>";
+  }
+
+  /** One row of the board. */
+  function rowHtml(p, mine) {
+    return '<li class="jtl__tile jtl__row' + (p.rank === 1 ? " jtl__row--first" : "") +
+      (mine ? " jtl__row--mine" : "") + '">' +
+      '<span class="jtl__n">' + p.rank + "</span>" +
+      '<span class="jtl__nm"><span class="jtl__nmt">' + esc(p.name) + "</span>" +
+      '<span class="jtl__sub">' + games(p.games) + " \u00b7 " + wrMeta(p) + "</span></span>" +
+      '<span class="jtl__sc">' + num(p.score) + moveChip(p.movement) + "</span>" +
+      "</li>";
+  }
+
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) {} }
 
@@ -236,6 +265,14 @@
         "</section>";
     }
 
+    if (this.me.unranked) {
+      return '<section class="jtl__tile jtl__pick">' +
+        "<h3>" + esc(this.me.you.name) + ", you are on the board</h3>" +
+        "<p>Your place shows up here once you have played a round.</p>" +
+        '<button class="jtl__link" data-jtl="forget">Not you?</button>' +
+        "</section>";
+    }
+
     var y = this.me.you;
     var line;
     if (this.me.ahead) {
@@ -273,14 +310,7 @@
     }
 
     var rows = d.players.map(function (p) {
-      return '<li class="jtl__tile jtl__row' +
-        (p.rank === 1 ? " jtl__row--first" : "") +
-        (p.id === mineId ? " jtl__row--mine" : "") + '">' +
-        '<span class="jtl__n">' + p.rank + "</span>" +
-        '<span class="jtl__nm"><span class="jtl__nmt">' + esc(p.name) + "</span>" +
-        '<span class="jtl__sub">' + games(p.games) + " · " + wrMeta(p) + "</span></span>" +
-        '<span class="jtl__sc">' + num(p.score) + "</span>" +
-        "</li>";
+      return rowHtml(p, p.id === mineId);
     }).join("");
 
     var count = d.total_players > d.players.length
